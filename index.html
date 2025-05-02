@@ -206,10 +206,9 @@
     </div>
   </div>
 
-  <!-- Only relevant part shown here -->
   <div class="controls">
-    <button onclick="updateScore(0)">➕1</button>
-    <button onclick="updateScore(1)">➕1</button>
+    <button onclick="updateScore(0)">➕ 1</button>
+    <button onclick="updateScore(1)">➕ 1</button>
     <button class="reset" onclick="resetAll()">Reset</button>
   </div>
 
@@ -229,7 +228,7 @@
       scores = [0, 0];
       document.getElementById("scoreDisplay").textContent = "0 - 0";
       clearInterval(timer);
-      startTimer(); // Restart timer after reset
+      startTimer();
     }
 
     document.getElementById("playerForm").addEventListener("submit", function (e) {
@@ -241,31 +240,23 @@
 
       document.getElementById("label1").textContent = name1;
       document.getElementById("label2").textContent = name2;
-      document.getElementById("btnName1").textContent = name1;
-      document.getElementById("btnName2").textContent = name2;
       document.getElementById("flagImg1").src = flag1;
       document.getElementById("flagImg2").src = flag2;
     });
 
     function startTimer() {
       countdown = 30;
-      document.getElementById(`timer${currentPlayer + 1}`).style.visibility = "visible";
-      document.getElementById(`timer${currentPlayer + 1}`).textContent = countdown;
+      const timerElement = document.getElementById(`timer${currentPlayer + 1}`);
+      timerElement.style.visibility = "visible";
+      timerElement.textContent = countdown;
+      timerElement.style.color = "#ffda44";
 
       timer = setInterval(() => {
         countdown--;
-        const timerElement = document.getElementById(`timer${currentPlayer + 1}`);
-        
+
         if (countdown >= 0) {
           timerElement.textContent = countdown;
-
-          // Change color to red when countdown is 10 or less
-          if (countdown <= 10) {
-            timerElement.style.color = "red";
-          } else {
-            // Revert to yellow if countdown goes above 10
-            timerElement.style.color = "#ffda44";
-          }
+          timerElement.style.color = countdown <= 10 ? "red" : "#ffda44";
         } else {
           clearInterval(timer);
           timerElement.style.visibility = "hidden";
@@ -305,6 +296,5 @@
       requestWakeLock();
     };
   </script>
-
 </body>
 </html>
