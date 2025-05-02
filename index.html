@@ -207,12 +207,11 @@
   </div>
 
   <!-- Only relevant part shown here -->
-<div class="controls">
-  <button onclick="updateScore(0)">➕1</button>
-  <button onclick="updateScore(1)">➕1</button>
-  <button class="reset" onclick="resetAll()">Reset</button>
-</div>
-
+  <div class="controls">
+    <button onclick="updateScore(0)">➕1</button>
+    <button onclick="updateScore(1)">➕1</button>
+    <button class="reset" onclick="resetAll()">Reset</button>
+  </div>
 
   <script>
     let scores = [0, 0];
@@ -255,11 +254,21 @@
 
       timer = setInterval(() => {
         countdown--;
+        const timerElement = document.getElementById(`timer${currentPlayer + 1}`);
+        
         if (countdown >= 0) {
-          document.getElementById(`timer${currentPlayer + 1}`).textContent = countdown;
+          timerElement.textContent = countdown;
+
+          // Change color to red when countdown is 10 or less
+          if (countdown <= 10) {
+            timerElement.style.color = "red";
+          } else {
+            // Revert to yellow if countdown goes above 10
+            timerElement.style.color = "#ffda44";
+          }
         } else {
           clearInterval(timer);
-          document.getElementById(`timer${currentPlayer + 1}`).style.visibility = "hidden";
+          timerElement.style.visibility = "hidden";
           currentPlayer = currentPlayer === 0 ? 1 : 0;
           startTimer();
         }
