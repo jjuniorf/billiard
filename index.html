@@ -19,8 +19,7 @@
       box-sizing: border-box;
     }
 
-    /* Form Styling */
-    form {
+    #playerForm {
       background: #1e1e2f;
       padding: 2rem;
       border-radius: 16px;
@@ -58,7 +57,6 @@
       color: #ccc;
     }
 
-    /* Scorebar Styling */
     .scorebar {
       margin-top: 2rem;
       background: #29294d;
@@ -97,7 +95,6 @@
       color: #ffda44;
     }
 
-    /* Controls Styling */
     .controls {
       margin-top: 2rem;
       display: flex;
@@ -131,18 +128,16 @@
       background: #d4372d;
     }
 
-    /* Timer Styling */
     .timer {
       font-size: 2rem;
       margin-top: 10px;
       color: #ffda44;
-      min-width: 60px; /* Ensures space is reserved */
+      min-width: 60px;
       text-align: center;
       display: inline-block;
-      visibility: hidden; /* Initially hidden */
+      visibility: hidden;
     }
 
-    /* Button Styling */
     .form-group button {
       width: 100%;
       padding: 14px;
@@ -159,14 +154,24 @@
       background: #3949ab;
     }
 
+    #toggleFormBtn {
+      margin-bottom: 1rem;
+      background: #2196f3;
+    }
+
+    #toggleFormBtn:hover {
+      background: #1976d2;
+    }
   </style>
 </head>
 <body>
 
+  <button id="toggleFormBtn" onclick="toggleForm()">Hide Player Editor</button>
+
   <form id="playerForm">
     <div class="form-group">
       <label for="name1">Player 1 Name</label>
-      <input type="text" id="name1" value="" />
+      <input type="text" id="name1" />
     </div>
     <div class="form-group">
       <label for="flag1">Player 1 Flag URL</label>
@@ -174,7 +179,7 @@
     </div>
     <div class="form-group">
       <label for="name2">Player 2 Name</label>
-      <input type="text" id="name2" value="" />
+      <input type="text" id="name2" />
     </div>
     <div class="form-group">
       <label for="flag2">Player 2 Flag URL</label>
@@ -189,7 +194,7 @@
     <div class="player">
       <img id="flagImg1" src="https://flagcdn.com/us.svg" class="flag" alt="Player 1 Flag">
       <span id="label1"></span>
-      <div id="timer1" class="timer" style="visibility: visible;">30</div>
+      <div id="timer1" class="timer">30</div>
     </div>
     <div class="center">
       <div class="score" id="scoreDisplay">0 - 0</div>
@@ -201,20 +206,23 @@
     </div>
   </div>
 
-  <div class="controls">
-    <button onclick="updateScore(0, 1)">Player 1 Wins</button>
-    <button onclick="updateScore(1, 1)">Player 2 Wins</button>
-    <button class="reset" onclick="resetAll()">Reset</button>
-  </div>
+  <!-- Only relevant part shown here -->
+<div class="controls">
+  <button onclick="updateScore(0)">➕1</button>
+  <button onclick="updateScore(1)">➕1</button>
+  <button class="reset" onclick="resetAll()">Reset</button>
+</div>
+
 
   <script>
     let scores = [0, 0];
-    let currentPlayer = 0; // 0 for player 1, 1 for player 2
+    let currentPlayer = 0;
     let timer;
-    let countdown;
+    let countdown = 30;
+    let wakeLock = null;
 
-    function updateScore(player, delta) {
-      scores[player] += delta; // Increase wins by 1
+    function updateScore(player) {
+      scores[player]++;
       document.getElementById("scoreDisplay").textContent = `${scores[0]} - ${scores[1]}`;
     }
 
@@ -222,50 +230,70 @@
       scores = [0, 0];
       document.getElementById("scoreDisplay").textContent = "0 - 0";
       clearInterval(timer);
-      // We will not clear the timer interval; we just reset the countdown and visibility
-      countdown = 30;
-      document.getElementById(`timer${currentPlayer + 1}`).style.visibility = "visible"; // Ensure the current player timer is visible
-      document.getElementById(`timer${currentPlayer + 1}`).textContent = countdown;
-      // Start the timer again if needed after resetting
-      startTimer();
+      startTimer(); // Restart timer after reset
     }
 
     document.getElementById("playerForm").addEventListener("submit", function (e) {
       e.preventDefault();
       const name1 = document.getElementById("name1").value;
-      const flag1 = document.getElementById("flag1").value;
       const name2 = document.getElementById("name2").value;
+      const flag1 = document.getElementById("flag1").value;
       const flag2 = document.getElementById("flag2").value;
 
       document.getElementById("label1").textContent = name1;
       document.getElementById("label2").textContent = name2;
+      document.getElementById("btnName1").textContent = name1;
+      document.getElementById("btnName2").textContent = name2;
       document.getElementById("flagImg1").src = flag1;
       document.getElementById("flagImg2").src = flag2;
     });
 
     function startTimer() {
       countdown = 30;
+      document.getElementById(`timer${currentPlayer + 1}`).style.visibility = "visible";
+      document.getElementById(`timer${currentPlayer + 1}`).textContent = countdown;
 
-      function updateTimer() {
-        if (countdown > 0) {
-          countdown--;
+      timer = setInterval(() => {
+        countdown--;
+        if (countdown >= 0) {
           document.getElementById(`timer${currentPlayer + 1}`).textContent = countdown;
         } else {
           clearInterval(timer);
-          document.getElementById(`timer${currentPlayer + 1}`).style.visibility = "hidden"; // Hide current player's timer
-          currentPlayer = currentPlayer === 0 ? 1 : 0; // Switch player
-          document.getElementById(`timer${currentPlayer + 1}`).style.visibility = "visible"; // Show new player's timer
-          countdown = 30; // Reset the timer for the new player
-          startTimer(); // Restart the timer for the new player
+          document.getElementById(`timer${currentPlayer + 1}`).style.visibility = "hidden";
+          currentPlayer = currentPlayer === 0 ? 1 : 0;
+          startTimer();
         }
-      }
-
-      timer = setInterval(updateTimer, 1000);
+      }, 1000);
     }
 
-    // Start the timer when the page loads
-    window.onload = function() {
+    function toggleForm() {
+      const form = document.getElementById("playerForm");
+      const toggleBtn = document.getElementById("toggleFormBtn");
+      form.style.display = form.style.display === "none" ? "grid" : "none";
+      toggleBtn.textContent = form.style.display === "none" ? "Show Player Editor" : "Hide Player Editor";
+    }
+
+    async function requestWakeLock() {
+      try {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', () => {
+          console.log('Wake Lock was released');
+        });
+        console.log('Wake Lock is active');
+      } catch (err) {
+        console.error(`${err.name}, ${err.message}`);
+      }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (wakeLock !== null && document.visibilityState === 'visible') {
+        requestWakeLock();
+      }
+    });
+
+    window.onload = () => {
       startTimer();
+      requestWakeLock();
     };
   </script>
 
